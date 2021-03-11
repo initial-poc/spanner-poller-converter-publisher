@@ -19,7 +19,7 @@ info:
     name: spanner-pollar-convereter-publisher
     description: Google cloud spanner poller converter publisher
     version: 1.0.0
-  java-vendor: ${java.specification.vendor}
+    java-vendor: ${java.specification.vendor}
 
 ---
 spring.profiles: dev
@@ -29,3 +29,7 @@ spring.profiles: test
 
 ---
 spring.profiles: prod
+
+---
+spring.cloud.gcp.project-id: sacred-garden-307305
+spring.cloud.gcp.credentials.location: file:C:\\Users\\ashu3\\AppData\\Roaming\\gcloud\\application_default_credentials.json
