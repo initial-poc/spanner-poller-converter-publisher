@@ -1,4 +1,4 @@
-# Google cloud spanner converter and pub sub publisher
+# Google cloud spanner poller converter and pub sub publisher
 
 * Create maven project using below command
 ```
