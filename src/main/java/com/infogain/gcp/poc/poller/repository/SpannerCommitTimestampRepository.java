@@ -29,13 +29,9 @@ public class SpannerCommitTimestampRepository {
 		Timestamp timestamp = null;
 		timestamp = spannerGateway
 				.getTimestampRecord(Statement.of(ApplicationConstant.LAST_COMIMT_TIMESTAMP_QUERY));
-		if (timestamp == null) {
-			logger.info("no timestamp in POLLER_COMMIT_TIMESTAMPS table");
-			timestamp = getCurrentTimestamp();
+		 
 
-		}
-
-		logger.info("got timestamp {}", timestamp);
+		logger.info("Timestamp in poller commit table {}", timestamp);
 		return timestamp;
 
 	}
@@ -46,7 +42,7 @@ public class SpannerCommitTimestampRepository {
 	
 	
 	public void setPollerLastTimestamp(Timestamp pollerLastExecutedTimestamp) {
-		logger.info("going to save the poller last executed timestamp {}", pollerLastExecutedTimestamp);
+		logger.info("Going to save the poller last executed timestamp {}", pollerLastExecutedTimestamp);
 		 Statement statement =  Statement.newBuilder(   ApplicationConstant.LAST_COMIMT_TIMESTAMP_SAVE_QUERY).bind(ApplicationConstant.LAST_POLLER_EXECUTION_TIMESTAMP_PLACE_HOLDER).to(pollerLastExecutedTimestamp).build();
 		spannerGateway.save(statement);
 	}

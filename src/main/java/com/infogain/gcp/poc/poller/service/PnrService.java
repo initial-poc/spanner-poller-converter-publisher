@@ -41,9 +41,15 @@ public class PnrService {
 		}catch(Exception ex) {
 			logger.info("Got exception while publishing the message {}",ex);
 		}finally {
-			logger.info("Going to save the poller last execution time into db");
-			Timestamp currentTimestamp = spannerCommitTimestampRepository.getCurrentTimestamp();
-			spannerCommitTimestampRepository.setPollerLastTimestamp(currentTimestamp);
+			Timestamp lastRecordUpdatedTimestamp=null;
+			if(pnrs.isEmpty()) {
+				lastRecordUpdatedTimestamp = spannerCommitTimestampRepository.getCurrentTimestamp();
+			}else {
+				  lastRecordUpdatedTimestamp=	getLastRecordUpdatedTimestamp(pnrs);
+			}
+			
+			logger.info("Going to save the poller last execution time into db {}",lastRecordUpdatedTimestamp);
+			spannerCommitTimestampRepository.setPollerLastTimestamp(lastRecordUpdatedTimestamp);
 		}
 		
 		
@@ -57,5 +63,9 @@ public class PnrService {
 
 	private void publishMessage(String message) {
 		messagingGateway.sendToPubsub(message);
+	}
+	
+	private Timestamp getLastRecordUpdatedTimestamp(List<PNR> pnrs) {
+		return pnrs.get(pnrs.size()-1).getLastUpdateTimestamp();
 	}
 }
