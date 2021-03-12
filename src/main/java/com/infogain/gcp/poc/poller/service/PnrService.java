@@ -1,28 +1,61 @@
 package com.infogain.gcp.poc.poller.service;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.cloud.Timestamp;
+import com.infogain.gcp.poc.App.PubsubOutboundGateway;
+import com.infogain.gcp.poc.convertor.MessageConvertor;
+import com.infogain.gcp.poc.poller.entity.PNR;
 import com.infogain.gcp.poc.poller.repository.PnrRepository;
 import com.infogain.gcp.poc.poller.repository.SpannerCommitTimestampRepository;
 
 @Service
 public class PnrService {
-
-	private SpannerCommitTimestampRepository spannerCommitTimestampRepository;
-	private PnrRepository pnrRepository;
+	private static final Logger logger = LoggerFactory.getLogger(PnrService.class);
+	private final SpannerCommitTimestampRepository spannerCommitTimestampRepository;
+	private final PnrRepository pnrRepository;
+	private final MessageConvertor messageConvertor;
+	private final PubsubOutboundGateway messagingGateway;
 
 	@Autowired
-	public PnrService(SpannerCommitTimestampRepository spannerCommitTimestampRepository, PnrRepository pnrRepository) {
+	public PnrService(SpannerCommitTimestampRepository spannerCommitTimestampRepository, PnrRepository pnrRepository,
+			MessageConvertor messageConvertor, PubsubOutboundGateway messagingGateway) {
+		super();
 		this.spannerCommitTimestampRepository = spannerCommitTimestampRepository;
 		this.pnrRepository = pnrRepository;
+		this.messageConvertor = messageConvertor;
+		this.messagingGateway = messagingGateway;
 	}
 
 	public void getUpdatedPnrDetails() {
 		Timestamp timestamp = spannerCommitTimestampRepository.getPollerCommitTimestamp();
-		pnrRepository.getPnrDetailToProcess(timestamp);
-		Timestamp currentTimestamp = spannerCommitTimestampRepository.getCurrentTimestamp();
-		spannerCommitTimestampRepository.setPollerLastTimestamp(currentTimestamp);
+		List<PNR> pnrs = pnrRepository.getPnrDetailToProcess(timestamp);
+		
+		try {
+			processMessage(pnrs);
+		}catch(Exception ex) {
+			logger.info("Got exception while publishing the message {}",ex);
+		}finally {
+			logger.info("Going to save the poller last execution time into db");
+			Timestamp currentTimestamp = spannerCommitTimestampRepository.getCurrentTimestamp();
+			spannerCommitTimestampRepository.setPollerLastTimestamp(currentTimestamp);
+		}
+		
+		
+		
+	}
+
+	private void processMessage(List<PNR> pnrs) {
+		pnrs.stream().forEach(pnr -> publishMessage(messageConvertor.doConvert(pnr)));
+
+	}
+
+	private void publishMessage(String message) {
+		messagingGateway.sendToPubsub(message);
 	}
 }

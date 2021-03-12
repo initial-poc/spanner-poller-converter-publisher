@@ -2,6 +2,24 @@ server.port: 9000
 
 spring.profiles.active: dev
 
+
+spring:
+ cloud:
+  gcp:
+   spanner:
+    instance-id: my-spanner
+    database: spanner-db
+
+poller:
+ commit:
+  table:
+   name: POLLER_COMMIT_TIMESTAMPS
+project:
+ name: authentic-wharf-302411
+primary:
+ table:
+   name: pnr
+
 ## logging
 logging:
   pattern.console: '%d{yyyy-MM-dd HH:mm:ss} [%X{source}] [%X{correlation-id}] [%-5level] [%C:%L] - %m%n'

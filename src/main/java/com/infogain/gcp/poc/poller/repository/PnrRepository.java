@@ -24,7 +24,7 @@ public class PnrRepository {
 	}
 
 
-	public void getPnrDetailToProcess(Timestamp timestamp) {
+	public List<PNR> getPnrDetailToProcess(Timestamp timestamp) {
 	
 		logger.info("try to get all the pnr after timestamp {}" ,timestamp);
 		 Statement statement =  Statement.newBuilder(   ApplicationConstant.POLL_QUERY).bind(ApplicationConstant.PREVIOUS_TIMESTAMP_PLACE_HOLDER).to(timestamp).build();
@@ -32,6 +32,7 @@ public class PnrRepository {
 		 List<PNR> pnrs=	 spannerGateway.getAllRecord(statement, PNR.class);
 		 logger.info("total pnr found {}",pnrs.size());
 		 logger.info("got the pnr {}",pnrs);
+		 return pnrs;
 	}
 	
 }
