@@ -15,7 +15,7 @@ import com.infogain.gcp.poc.poller.gateway.SpannerGateway;
 public class SpannerCommitTimestampRepository {
 	private static final Logger logger= LoggerFactory.getLogger(SpannerCommitTimestampRepository.class);
 
-	@Value("${pollerCommitTableName}")
+	@Value("${poller.commit.table.name}")
 	private String pollerCommitTableName;
 
 	private SpannerGateway spannerGateway;
