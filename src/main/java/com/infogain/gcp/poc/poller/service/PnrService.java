@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.stereotype.Service;
 
 import com.google.cloud.Timestamp;
@@ -20,40 +21,38 @@ public class PnrService {
 	private final SpannerCommitTimestampRepository spannerCommitTimestampRepository;
 	private final PnrRepository pnrRepository;
 	private final MessageConvertor messageConvertor;
-	private final PubsubOutboundGateway messagingGateway;
+	private final PubSubTemplate pubSubTemplate;
 
 	@Autowired
 	public PnrService(SpannerCommitTimestampRepository spannerCommitTimestampRepository, PnrRepository pnrRepository,
-			MessageConvertor messageConvertor, PubsubOutboundGateway messagingGateway) {
+			MessageConvertor messageConvertor, PubSubTemplate pubSubTemplate) {
 		super();
 		this.spannerCommitTimestampRepository = spannerCommitTimestampRepository;
 		this.pnrRepository = pnrRepository;
 		this.messageConvertor = messageConvertor;
-		this.messagingGateway = messagingGateway;
+		this.pubSubTemplate = pubSubTemplate;
 	}
 
 	public void getUpdatedPnrDetails() {
 		Timestamp timestamp = spannerCommitTimestampRepository.getPollerCommitTimestamp();
 		List<PNR> pnrs = pnrRepository.getPnrDetailToProcess(timestamp);
-		
+
 		try {
 			processMessage(pnrs);
-		}catch(Exception ex) {
-			logger.info("Got exception while publishing the message {}",ex);
-		}finally {
-			Timestamp lastRecordUpdatedTimestamp=null;
-			if(pnrs.isEmpty()) {
+		} catch (Exception ex) {
+			logger.info("Got exception while publishing the message {}", ex);
+		} finally {
+			Timestamp lastRecordUpdatedTimestamp = null;
+			if (pnrs.isEmpty()) {
 				lastRecordUpdatedTimestamp = spannerCommitTimestampRepository.getCurrentTimestamp();
-			}else {
-				  lastRecordUpdatedTimestamp=	getLastRecordUpdatedTimestamp(pnrs);
+			} else {
+				lastRecordUpdatedTimestamp = getLastRecordUpdatedTimestamp(pnrs);
 			}
-			
-			logger.info("Going to save the poller last execution time into db {}",lastRecordUpdatedTimestamp);
+
+			logger.info("Going to save the poller last execution time into db {}", lastRecordUpdatedTimestamp);
 			spannerCommitTimestampRepository.setPollerLastTimestamp(lastRecordUpdatedTimestamp);
 		}
-		
-		
-		
+
 	}
 
 	private void processMessage(List<PNR> pnrs) {
@@ -62,10 +61,10 @@ public class PnrService {
 	}
 
 	private void publishMessage(String message) {
-		messagingGateway.sendToPubsub(message);
+		pubSubTemplate.publish("testTopic", message);
 	}
-	
+
 	private Timestamp getLastRecordUpdatedTimestamp(List<PNR> pnrs) {
-		return pnrs.get(pnrs.size()-1).getLastUpdateTimestamp();
+		return pnrs.get(pnrs.size() - 1).getLastUpdateTimestamp();
 	}
 }
