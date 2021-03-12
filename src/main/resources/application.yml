@@ -31,5 +31,5 @@ spring.profiles: test
 spring.profiles: prod
 
 ---
-spring.cloud.gcp.project-id: sacred-garden-307305
-spring.cloud.gcp.credentials.location: file:C:\\Users\\ashu3\\AppData\\Roaming\\gcloud\\application_default_credentials.json
+#spring.cloud.gcp.project-id: sacred-garden-307305
+#spring.cloud.gcp.credentials.location: file:C:\\Users\\ashu3\\AppData\\Roaming\\gcloud\\application_default_credentials.json
