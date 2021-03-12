@@ -15,24 +15,30 @@ import com.infogain.gcp.poc.poller.gateway.SpannerGateway;
 
 @Repository
 public class PnrRepository {
-	private static final Logger logger= LoggerFactory.getLogger(PnrRepository.class);
+	private static final Logger logger = LoggerFactory.getLogger(PnrRepository.class);
 	private SpannerGateway spannerGateway;
-	
-@Autowired	
+
+	@Autowired
 	public PnrRepository(SpannerGateway spannerGateway) {
 		this.spannerGateway = spannerGateway;
 	}
 
-
 	public List<PNR> getPnrDetailToProcess(Timestamp timestamp) {
-	
-		logger.info("try to get all the pnr after timestamp {}" ,timestamp);
-		 Statement statement =  Statement.newBuilder(   ApplicationConstant.POLL_QUERY).bind(ApplicationConstant.PREVIOUS_TIMESTAMP_PLACE_HOLDER).to(timestamp).build();
-		 
-		 List<PNR> pnrs=	 spannerGateway.getAllRecord(statement, PNR.class);
-		 logger.info("total pnr found {}",pnrs.size());
-		 logger.info("got the pnr {}",pnrs);
-		 return pnrs;
+		Statement statement = null;
+		if (timestamp == null) {
+			logger.info("Last commit timestamp is null in table so getting all pnr records from db");
+			statement = Statement.of(ApplicationConstant.POLL_QUERY_WITHOUT_TIMESTAMP);
+		} else {
+			logger.info("Getting all the PNR after timestamp {}", timestamp);
+			statement = Statement.newBuilder(ApplicationConstant.POLL_QUERY_WITH_TIMESTAMP)
+					.bind(ApplicationConstant.PREVIOUS_TIMESTAMP_PLACE_HOLDER).to(timestamp).build();
+		}
+		
+
+		List<PNR> pnrs = spannerGateway.getAllRecord(statement, PNR.class);
+		logger.info("Total PNR Found {}", pnrs.size());
+		logger.info("PNR RECORDS ARE  {}", pnrs);
+		return pnrs;
 	}
-	
+
 }

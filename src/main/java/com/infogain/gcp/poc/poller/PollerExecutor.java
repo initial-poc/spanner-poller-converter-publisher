@@ -22,7 +22,7 @@ public PollerExecutor(PnrService pnrService) {
 }
 
 	
-@Scheduled(cron = "*/3 * * * * *")
+@Scheduled(cron = "*/10 * * * * *")
 	public void process() {
 		log.info("poller started at {}",LocalTime.now());
 		pnrService.getUpdatedPnrDetails();

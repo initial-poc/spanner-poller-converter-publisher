@@ -24,7 +24,7 @@ public class SpannerGateway {
 		Timestamp timestamp = null;
 		ResultSet rs = spannerTemplate.executeQuery(statement, null);
 		if (rs.next()) {
-			timestamp = rs.getTimestamp(0);
+			timestamp = rs.isNull(0) ? timestamp : rs.getTimestamp(0);
 		}
 
 		return timestamp;
