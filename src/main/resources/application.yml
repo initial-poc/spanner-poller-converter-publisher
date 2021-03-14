@@ -1,21 +1,21 @@
 server.port: 9000
 
-spring.profiles.active: dev
-
-
 spring:
+ profiles.active: dev
  cloud:
-  gcp:
-   spanner:
-    instance-id: my-spanner
-    database: spanner-db
+   gcp:
+     project-id: gcp-practice-project-307011
+     # credentials.location: file:C:\\Users\\ashu3\\AppData\\Roaming\\gcloud\\application_default_credentials.json
+     spanner:
+       instance-id: spanner-instance-1
+       database: spanner-db-1
 
 poller:
  commit:
   table:
    name: POLLER_COMMIT_TIMESTAMPS
 project:
- name: authentic-wharf-302411
+ name: gcp-practice-project-307011
 primary:
  table:
    name: pnr
@@ -39,6 +39,8 @@ info:
     version: 1.0.0
     java-vendor: ${java.specification.vendor}
 
+app:
+  topic.name: topic-1
 ---
 spring.profiles: dev
 
@@ -47,7 +49,3 @@ spring.profiles: test
 
 ---
 spring.profiles: prod
-
----
-spring.cloud.gcp.project-id: sacred-garden-307305
-spring.cloud.gcp.credentials.location: file:C:\\Users\\ashu3\\AppData\\Roaming\\gcloud\\application_default_credentials.json
