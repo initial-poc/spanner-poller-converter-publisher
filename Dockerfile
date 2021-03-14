@@ -1,18 +1,3 @@
-#FROM openjdk:8-jdk-alpine
-
-# Following command to create docker image with jar created using maven
-#COPY target/spanner-poller-converter-publisher.jar spanner-poller-converter-publisher.jar
-
-#RUN mkdir -p /app/config/ \
-#    && chmod -R a+rwx /app
-
-#COPY keys.json /app/config/keys.json
-
-#EXPOSE 9000
-#ENTRYPOINT ["java", "-jar", "pub-sub-consumer.jar", "--spring.cloud.gcp.credentials.location=file:///app/config/keys.json"]
-#ENTRYPOINT ["java", "-jar", "spanner-poller-converter-publisher.jar"]
-
-
 FROM adoptopenjdk/openjdk11:alpine-jre
 
 # maintainer info
