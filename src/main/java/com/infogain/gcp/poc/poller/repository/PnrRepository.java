@@ -2,6 +2,7 @@ package com.infogain.gcp.poc.poller.repository;
 
 import java.util.List;
 
+import com.infogain.gcp.poc.poller.entity.PNREntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import com.google.cloud.Timestamp;
 import com.google.cloud.spanner.Statement;
 import com.infogain.gcp.poc.util.ApplicationConstant;
-import com.infogain.gcp.poc.poller.entity.PNR;
 import com.infogain.gcp.poc.component.SpannerGateway;
 
 @Slf4j
@@ -23,7 +23,7 @@ public class PnrRepository {
 		this.spannerGateway = spannerGateway;
 	}
 
-	public List<PNR> getPnrDetailToProcess(Timestamp timestamp) {
+	public List<PNREntity> getPnrDetailToProcess(Timestamp timestamp) {
 		Statement statement = null;
 		if (timestamp == null) {
 			log.info("Last commit timestamp is null in table so getting all pnr records from db");
@@ -34,10 +34,12 @@ public class PnrRepository {
 					.bind(ApplicationConstant.PREVIOUS_TIMESTAMP_PLACE_HOLDER).to(timestamp).build();
 		}
 
-		List<PNR> pnrs =  spannerGateway.getAllRecord(statement, PNR.class);
-		log.info("Total PNR Found {}", pnrs.size());
-		log.info("PNR RECORDS ARE  {}", pnrs);
-		return pnrs;
+		List<PNREntity> pnrEntities =  spannerGateway.getAllRecord(statement, PNREntity.class);
+		log.info("Total PNR Found {}", pnrEntities.size());
+		log.info("PNR RECORDS ARE  {}", pnrEntities);
+		return pnrEntities;
 	}
+
+
 
 }

@@ -13,19 +13,19 @@ import com.google.cloud.Timestamp;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(of = {"pnr"})
+@ToString(of = {"pnrId"})
 @Table(name = "pnr")
-public class PNR {
+public class PNREntity {
 
 	@PrimaryKey
-	@Column(name = "pnr")
-	private String pnr;
+	@Column(name = "pnr_id")
+	private String pnrId;
 
 	private String mobileNumber;
 
 	private String remark;
 
-	@Column(name = "lastUpdateTimestamp")
+	@Column(name = "lastUpdateTimestamp", spannerCommitTimestamp = true)
 	private Timestamp lastUpdateTimestamp;
 
 }

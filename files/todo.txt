@@ -1,0 +1,26 @@
+use SpannerRepository
+
+write API which do the insert/updated
+	postmane runner with multiple inserts/update/delete
+
+multiple insert/update/delete multiple table simultaneosuly
+	application should be able to handle
+
+filter subscription
+	Implement this
+	filtered by key
+	write 2 consumers
+		1 consumer consumes all messages
+		1 consumer consumes by filter
+
+i have made some pointers -remove dependency spanner repository
+simultanious changes in repository
+filter on behalf ok key
+jpa(not clear on this)
+multimle row update
+delete any record
+
+Retry
+	Resiliency4J
+
+Group of tables based on business functionality

@@ -6,18 +6,19 @@ mvn archetype:generate -DgroupId=com.infogain.gcp.poc -DartifactId=spanner-polle
 ```
 
 # Spanner DDL scripts
-* pnr table
+* pnrEntity table
 ```
 CREATE TABLE pnr (
-    pnr STRING(MAX),
+    pnr_id STRING(MAX),
     lastUpdateTimestamp TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp=true),
     mobileNumber STRING(MAX),
     remark STRING(MAX),
-) PRIMARY KEY (pnr);
+) PRIMARY KEY (pnr_id);
 ```
+
 * poller commit timestamp
 ```
 CREATE TABLE POLLER_COMMIT_TIMESTAMPS (
-    last_commit_timestamp TIMESTAMP,
+    last_commit_timestamp TIMESTAMP
 ) PRIMARY KEY (last_commit_timestamp);
 ```
