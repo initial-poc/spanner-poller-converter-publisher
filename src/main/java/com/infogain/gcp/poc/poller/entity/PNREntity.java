@@ -1,9 +1,6 @@
 package com.infogain.gcp.poc.poller.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.Column;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.PrimaryKey;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.Table;
@@ -11,6 +8,7 @@ import org.springframework.cloud.gcp.data.spanner.core.mapping.Table;
 import com.google.cloud.Timestamp;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(of = {"pnrId"})

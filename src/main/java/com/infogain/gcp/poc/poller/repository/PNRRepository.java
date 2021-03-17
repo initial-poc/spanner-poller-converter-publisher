@@ -8,9 +8,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PNREntityRepository extends SpannerRepository<PNREntity, String> {
+public interface PNRRepository extends SpannerRepository<PNREntity, String> {
 
     List<PNREntity> findAllByOrderByLastUpdateTimestamp();
 
     List<PNREntity> findByLastUpdateTimestampGreaterThanOrderByLastUpdateTimestamp(Timestamp lastUpdateTimestamp);
+
 }
