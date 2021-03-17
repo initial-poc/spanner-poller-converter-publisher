@@ -99,7 +99,7 @@ public class PnrService {
 	}
 
 	public void execute() {
-		Optional<PollerCommitTimestampEntity> pollerCommitTimestampEntityOptional = pollerCommitTimestampRepository.findFirstByOrderByLastCommitTimestamp();
+		Optional<PollerCommitTimestampEntity> pollerCommitTimestampEntityOptional = pollerCommitTimestampRepository.findFirstByOrderByLastCommitTimestampDesc();
 		log.info("last-poller-commit-timestamp={}", pollerCommitTimestampEntityOptional);
 
 		Timestamp timestamp = null;

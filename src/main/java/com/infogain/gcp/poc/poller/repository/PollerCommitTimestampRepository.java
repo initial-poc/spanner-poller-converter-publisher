@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface PollerCommitTimestampRepository extends SpannerRepository<PollerCommitTimestampEntity, Timestamp> {
 
-    Optional<PollerCommitTimestampEntity> findFirstByOrderByLastCommitTimestamp();
+    Optional<PollerCommitTimestampEntity> findFirstByOrderByLastCommitTimestampDesc();
 
 }
