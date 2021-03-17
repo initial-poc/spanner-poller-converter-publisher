@@ -13,12 +13,8 @@ import com.google.cloud.spanner.Statement;
 @Component
 public class SpannerGateway {
 
-    private SpannerTemplate spannerTemplate;
-
     @Autowired
-    public SpannerGateway(SpannerTemplate spannerTemplate) {
-        this.spannerTemplate = spannerTemplate;
-    }
+    private SpannerTemplate spannerTemplate;
 
     public Timestamp getTimestampRecord(Statement statement) {
         Timestamp timestamp = null;
@@ -28,15 +24,6 @@ public class SpannerGateway {
         }
 
         return timestamp;
-    }
-
-    public <T> List<T> getAllRecord(Statement statement, Class<T> type) {
-        return this.spannerTemplate.query(type, statement, null);
-    }
-
-
-    public void save(Statement statement) {
-        this.spannerTemplate.executeDmlStatement(statement);
     }
 
 }

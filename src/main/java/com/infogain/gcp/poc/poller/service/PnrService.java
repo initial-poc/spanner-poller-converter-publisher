@@ -1,7 +1,15 @@
 package com.infogain.gcp.poc.poller.service;
 
 import java.util.List;
+import java.util.Optional;
 
+import com.google.cloud.spanner.Statement;
+import com.infogain.gcp.poc.component.SpannerGateway;
+import com.infogain.gcp.poc.poller.entity.PNREntity;
+import com.infogain.gcp.poc.poller.entity.PollerCommitTimestampEntity;
+import com.infogain.gcp.poc.poller.repository.PNRRepository;
+import com.infogain.gcp.poc.poller.repository.PollerCommitTimestampRepository;
+import com.infogain.gcp.poc.util.ApplicationConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,57 +19,53 @@ import org.springframework.stereotype.Service;
 
 import com.google.cloud.Timestamp;
 import com.infogain.gcp.poc.component.MessageConverter;
-import com.infogain.gcp.poc.poller.entity.PNR;
-import com.infogain.gcp.poc.poller.repository.PnrRepository;
-import com.infogain.gcp.poc.poller.repository.SpannerCommitTimestampRepository;
 
 @Slf4j
 @Service
 public class PnrService {
 
-	private final SpannerCommitTimestampRepository spannerCommitTimestampRepository;
-	private final PnrRepository pnrRepository;
-	private final MessageConverter messageConverter;
-	private final PubSubTemplate pubSubTemplate;
-
 	@Value("${app.topic.name}")
 	private String topicName;
 
 	@Autowired
-	public PnrService(SpannerCommitTimestampRepository spannerCommitTimestampRepository,
-					  PnrRepository pnrRepository,
-					  MessageConverter messageConverter,
-					  PubSubTemplate pubSubTemplate) {
-		this.spannerCommitTimestampRepository = spannerCommitTimestampRepository;
-		this.pnrRepository = pnrRepository;
-		this.messageConverter = messageConverter;
-		this.pubSubTemplate = pubSubTemplate;
+	private MessageConverter messageConverter;
+
+	@Autowired
+	private PubSubTemplate pubSubTemplate;
+
+	@Autowired
+	private PollerCommitTimestampRepository pollerCommitTimestampRepository;
+
+	@Autowired
+	private PNRRepository pnrRepository;
+
+	@Autowired
+	private SpannerGateway spannerGateway;
+
+	private Timestamp getCurrentTimestamp() {
+		return spannerGateway.getTimestampRecord(Statement.of(ApplicationConstant.CURRENT_TIMESTAMP_QUERY));
 	}
 
-	public void execute() {
-		Timestamp timestamp = spannerCommitTimestampRepository.getPollerCommitTimestamp();
-		List<PNR> pnrs = ListUtils.emptyIfNull(pnrRepository.getPnrDetailToProcess(timestamp));
+	private List<PNREntity> getPnrDetailToProcess(Timestamp timestamp) {
+		List<PNREntity> pnrEntities = null;
 
-		try {
-			processMessage(pnrs);
-		} catch (Exception ex) {
-			log.info("Got exception while publishing the message", ex);
-		} finally {
-			Timestamp lastRecordUpdatedTimestamp = null;
-			if (pnrs.isEmpty()) {
-				lastRecordUpdatedTimestamp = spannerCommitTimestampRepository.getCurrentTimestamp();
-			} else {
-				lastRecordUpdatedTimestamp = getLastRecordUpdatedTimestamp(pnrs);
-			}
-
-			log.info("Going to save the poller last execution time into db {}", lastRecordUpdatedTimestamp);
-			spannerCommitTimestampRepository.setPollerLastTimestamp(lastRecordUpdatedTimestamp);
+		if (timestamp == null) {
+			log.info("Last commit timestamp is null in table so getting all pnr records from db");
+			pnrEntities = pnrRepository.findAllByOrderByLastUpdateTimestamp();
+		} else {
+			log.info("Getting all the PNR after timestamp {}", timestamp);
+			pnrEntities = pnrRepository.findByLastUpdateTimestampGreaterThanOrderByLastUpdateTimestamp(timestamp);
 		}
 
+		pnrEntities = ListUtils.emptyIfNull(pnrEntities);
+		log.info("Total PNR Found {}", pnrEntities.size());
+		log.info("PNR RECORDS ARE  {}", pnrEntities);
+
+		return pnrEntities;
 	}
 
-	private void processMessage(List<PNR> pnrs) {
-		pnrs.forEach(pnr -> publishMessage(messageConverter.convert(pnr)));
+	private void processMessage(List<PNREntity> pnrEntities) {
+		pnrEntities.forEach(pnrEntity -> publishMessage(messageConverter.convert(pnrEntity)));
 	}
 
 	private void publishMessage(String message) {
@@ -70,8 +74,49 @@ public class PnrService {
 		log.info("published message {} to topic {}", message, topicName);
 	}
 
-	private Timestamp getLastRecordUpdatedTimestamp(List<PNR> pnrs) {
-		return pnrs.get(pnrs.size() - 1).getLastUpdateTimestamp();
+	private Timestamp getLastRecordUpdatedTimestamp(List<PNREntity> pnrEntities) {
+		return pnrEntities.get(pnrEntities.size() - 1).getLastUpdateTimestamp();
+	}
+
+	private void savePollerCommitTimestamp(Timestamp timestamp, List<PNREntity> pnrEntities) {
+		Timestamp lastRecordUpdatedTimestamp = null;
+		if (pnrEntities.isEmpty()) {
+			lastRecordUpdatedTimestamp = getCurrentTimestamp();
+		} else {
+			lastRecordUpdatedTimestamp = getLastRecordUpdatedTimestamp(pnrEntities);
+		}
+
+		log.info("Going to save the poller last execution time into db {}", lastRecordUpdatedTimestamp);
+
+		if(null == timestamp || !timestamp.equals(lastRecordUpdatedTimestamp)){
+			PollerCommitTimestampEntity pollerCommitTimestampEntityLatest = PollerCommitTimestampEntity.builder().lastCommitTimestamp(lastRecordUpdatedTimestamp).build();
+			pollerCommitTimestampRepository.save(pollerCommitTimestampEntityLatest);
+			log.info("Saved the poller last execution time into db {}", lastRecordUpdatedTimestamp);
+		}else{
+			log.info("last record updated timestamp already updated. So not inserting again");
+		}
+
+	}
+
+	public void execute() {
+		Optional<PollerCommitTimestampEntity> pollerCommitTimestampEntityOptional = pollerCommitTimestampRepository.findFirstByOrderByLastCommitTimestamp();
+		log.info("last-poller-commit-timestamp={}", pollerCommitTimestampEntityOptional);
+
+		Timestamp timestamp = null;
+		if(pollerCommitTimestampEntityOptional.isPresent()){
+			timestamp = pollerCommitTimestampEntityOptional.get().getLastCommitTimestamp();
+		}
+
+		// get PNREntity list by timestamp
+		List<PNREntity> pnrEntities = getPnrDetailToProcess(timestamp);
+
+		try {
+			processMessage(pnrEntities);
+		} catch (Exception ex) {
+			log.info("Got exception while publishing the message", ex);
+		} finally {
+			savePollerCommitTimestamp(timestamp, pnrEntities);
+		}
 	}
 
 }

@@ -7,13 +7,13 @@ spring:
      project-id: gcp-practice-project-307011
      # credentials.location: file:C:\\Users\\ashu3\\AppData\\Roaming\\gcloud\\application_default_credentials.json
      spanner:
-       instance-id: spanner-instance-1
-       database: spanner-db-1
+       instance-id: instance-1
+       database: database-1
 
-poller:
- commit:
-  table:
-   name: POLLER_COMMIT_TIMESTAMPS
+#poller:
+# commit:
+#  table:
+#   name: POLLER_COMMIT_TIMESTAMPS
 project:
  name: gcp-practice-project-307011
 primary:

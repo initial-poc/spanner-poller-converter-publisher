@@ -13,10 +13,4 @@ public class App {
 		SpringApplication.run(App.class, args);
 	}
 
-	// tag::messageGateway[]
-	/*@MessagingGateway(defaultRequestChannel = "pubsubOutputChannel")
-	public interface PubsubOutboundGateway {
-		void sendToPubsub(String text);
-	}*/
-	// end::messageGateway[]
 }
