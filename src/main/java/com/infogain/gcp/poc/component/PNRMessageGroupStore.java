@@ -23,7 +23,8 @@ public class PNRMessageGroupStore {
 		PNREntity pnrEntity = pnrModel.buildEntity(); 
 		pnrEntity.setStatus(IN_PROGRESS);
 		log.info("saving message {}",pnrEntity);
-		groupMessageStoreRepository.save(pnrEntity);
+		
+		groupMessageStoreRepository.getSpannerTemplate().insert(pnrEntity);
 		
 	}
 

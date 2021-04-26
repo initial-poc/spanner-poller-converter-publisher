@@ -1,6 +1,7 @@
 package com.infogain.gcp.poc.controller;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,11 +20,11 @@ public class MessageController {
 	private final PNRSequencingService pnrSequencingService;
 	
 	@PostMapping("/pnrs")
-	public String processMessge(PNRModel message) {
+	public String processMessge(@RequestBody PNRModel message) {
 		log.info("Got the message {}",message);
 		pnrSequencingService.processPNR(message);
 		
-		return null;
+		return "success";
 		
 	}
 }
