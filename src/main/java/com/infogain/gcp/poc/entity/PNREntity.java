@@ -4,6 +4,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.Column;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.PrimaryKey;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.Table;
+import org.springframework.data.annotation.Version;
 
 import com.google.cloud.Timestamp;
 import com.infogain.gcp.poc.domainmodel.PNRModel;
@@ -26,7 +27,8 @@ public class PNREntity implements Comparable{
     @PrimaryKey(keyOrder = 1)
     @Column(name = "pnrid")
     private String pnrid;
-
+@Version
+private   long version;
     @PrimaryKey(keyOrder = 2)
     @Column(name = "messageseq")
     private Integer messageseq;
