@@ -4,7 +4,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.Column;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.PrimaryKey;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.Table;
-import org.springframework.data.annotation.Version;
 
 import com.google.cloud.Timestamp;
 import com.infogain.gcp.poc.domainmodel.PNRModel;
@@ -22,18 +21,15 @@ import lombok.ToString;
 @ToString
 @Builder
 @Table(name = "group_message_store")
-public class PNREntity implements Comparable{
+public class PNREntity implements Comparable<PNREntity>{
 
     @PrimaryKey(keyOrder = 1)
     @Column(name = "pnrid")
     private String pnrid;
-@Version
-private   long version;
     @PrimaryKey(keyOrder = 2)
     @Column(name = "messageseq")
     private Integer messageseq;
 
-    @PrimaryKey(keyOrder = 3)
     @Column(name = "status")
     private String status;
 
@@ -42,6 +38,10 @@ private   long version;
 
     @Column(name = "timestamp")
     private Timestamp timestamp;
+    
+    
+    @Column(name = "instance")
+    private String instance;
 
     @SneakyThrows
     public PNRModel buildModel() {
@@ -51,7 +51,7 @@ private   long version;
     }
 
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(PNREntity o) {
        return this.getMessageseq().compareTo(((PNREntity)o).getMessageseq());
     }
 }

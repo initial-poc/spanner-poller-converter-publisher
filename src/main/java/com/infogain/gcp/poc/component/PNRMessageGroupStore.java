@@ -1,7 +1,10 @@
 package com.infogain.gcp.poc.component;
 
+import java.net.InetAddress;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.infogain.gcp.poc.domainmodel.PNRModel;
@@ -9,18 +12,31 @@ import com.infogain.gcp.poc.entity.PNREntity;
 import com.infogain.gcp.poc.poller.repository.GroupMessageStoreRepository;
 import com.infogain.gcp.poc.util.AppConstant;
 
-import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class PNRMessageGroupStore {
 	private final GroupMessageStoreRepository groupMessageStoreRepository;
+	private final String ip ;
+	
+	@Value(value = "${name}")
+	private String name;
+	
+	
+	@Autowired
+	@SneakyThrows
+	public PNRMessageGroupStore(GroupMessageStoreRepository groupMessageStoreRepository) {
+		super();
+		this.groupMessageStoreRepository = groupMessageStoreRepository;
+		ip= InetAddress.getLocalHost().getHostAddress();
+	}
 
 	public PNREntity addMessage(PNRModel pnrModel) {
 		PNREntity pnrEntity = pnrModel.buildEntity();
 		pnrEntity.setStatus(AppConstant.IN_PROGRESS);
+		pnrEntity.setInstance(name);
 		log.info("saving message {}", pnrEntity);
 
 		groupMessageStoreRepository.getSpannerTemplate().insert(pnrEntity);
@@ -33,6 +49,7 @@ public class PNRMessageGroupStore {
 
 		pnrEntity.stream().forEach(entity -> {
 			entity.setStatus(AppConstant.RELEASED);
+			entity.setInstance(name);
 			groupMessageStoreRepository.getSpannerTemplate().update(entity);
 			//groupMessageStoreRepository.save(entity);
 		});

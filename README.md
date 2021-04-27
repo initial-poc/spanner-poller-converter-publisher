@@ -19,3 +19,10 @@ CREATE TABLE group_message_store (
  
 ```
  
+ 
+ CREATE UNIQUE INDEX pnr_index 
+ON group_message_store (
+	pnrid,
+	messageseq,
+	status
+)

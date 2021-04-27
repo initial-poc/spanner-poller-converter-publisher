@@ -20,11 +20,12 @@ public class PNRSequencingService {
 	
 	private final ReleaseStrategyService releaseStrategyService;
 
+	//@Transactional(   rollbackFor = RuntimeException.class)
 	public void processPNR(PNRModel pnrModel) {
 		PNREntity pnrEntity = messageGroupStore.addMessage(pnrModel);
 		List<PNREntity> toReleaseMessage = releaseStrategyService.release(pnrEntity);
 		messageGroupStore.releaseMessage(toReleaseMessage);
-		
+		log.info("process completed");
 	}
 	
 	
