@@ -21,8 +21,7 @@ public class PNRMessageGroupStore {
 	private final GroupMessageStoreRepository groupMessageStoreRepository;
 	private final String ip ;
 	
-	@Value(value = "${name}")
-	private String name;
+ 
 	
 	
 	@Autowired
@@ -36,7 +35,7 @@ public class PNRMessageGroupStore {
 	public PNREntity addMessage(PNRModel pnrModel) {
 		PNREntity pnrEntity = pnrModel.buildEntity();
 		pnrEntity.setStatus(AppConstant.IN_PROGRESS);
-		pnrEntity.setInstance(name);
+		pnrEntity.setInstance(ip);
 		log.info("saving message {}", pnrEntity);
 
 		groupMessageStoreRepository.getSpannerTemplate().insert(pnrEntity);
@@ -49,9 +48,8 @@ public class PNRMessageGroupStore {
 
 		pnrEntity.stream().forEach(entity -> {
 			entity.setStatus(AppConstant.RELEASED);
-			entity.setInstance(name);
+			entity.setInstance(ip);
 			groupMessageStoreRepository.getSpannerTemplate().update(entity);
-			//groupMessageStoreRepository.save(entity);
 		});
 
 	}

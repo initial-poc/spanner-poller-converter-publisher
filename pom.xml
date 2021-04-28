@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.infogain.gcp.poc</groupId>
-    <artifactId>spanner-poller-converter-publisher</artifactId>
+    <artifactId>pnr-resequencer-service</artifactId>
     <packaging>jar</packaging>
     <version>1.0.0</version>
 
