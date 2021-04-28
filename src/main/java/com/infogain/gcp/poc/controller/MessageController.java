@@ -22,6 +22,7 @@ public class MessageController {
 	@PostMapping("/pnrs")
 	public String processMessge(@RequestBody PNRModel message) {
 		log.info("Got the message {}",message);
+		 
 		pnrSequencingService.processPNR(message);
 		
 		return "success";
